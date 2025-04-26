@@ -2,7 +2,7 @@ import data from '../data/usuarios.json' with { type: "json" };
 
 export const getUsers = (req, res) => {
   if (!data || data.length === 0) {
-    return res.status(404).json({ message: 'No hay usuarios disponibles.' });
+    return res.status(400).json({ message: 'No hay usuarios disponibles.' });
   }
   res.json(data);
 };
@@ -11,7 +11,7 @@ export const getUser = (req, res) => {
   const { id } = req.params;
   const user = data.find(user => user.id === parseInt(id));
   if (!user) {
-    return res.status(404).json({ message: 'Usuario no encontrado.' });
+    return res.status(400).json({ message: 'Usuario no encontrado.' });
   }
   res.json(user);
 };
@@ -33,7 +33,7 @@ export const createUser = (req, res) => {
       apellido: lastName,
       email,
       contraseña: password
-    };s
+    }; s
     data.push(newUser);
     res.status(201).json(newUser);
   } catch (error) {
@@ -45,23 +45,23 @@ export const getUserByParams = (req, res) => {
   try {
     const { names, lastNames, emails } = req.body || {};
     let filteredUsers = data;
-    if (names && Array.isArray(names)) {
+    if (names && Array.isArray(names) && names.length) {
       filteredUsers = filteredUsers.filter(user =>
         names.some(name => user.nombre.toLowerCase().includes(name.toLowerCase()))
       );
     }
-    if (lastNames && Array.isArray(lastNames)) {
+    if (lastNames && Array.isArray(lastNames) && lastNames.length) {
       filteredUsers = filteredUsers.filter(user =>
         lastNames.some(lastName => user.apellido.toLowerCase().includes(lastName.toLowerCase()))
       );
     }
-    if (emails && Array.isArray(emails)) {
+    if (emails && Array.isArray(emails) && emails.length) {
       filteredUsers = filteredUsers.filter(user =>
         emails.some(email => user.email.toLowerCase().includes(email.toLowerCase()))
       );
     }
     if (filteredUsers.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron usuarios con esos parámetros' });
+      return res.status(400).json({ message: 'No se encontraron usuarios con esos parámetros' });
     }
     res.status(200).json(filteredUsers);
   } catch (error) {
@@ -78,7 +78,7 @@ export const updateUser = (req, res) => {
     }
     const userIndex = data.findIndex(user => user.id === parseInt(id));
     if (userIndex === -1) {
-      return res.status(404).json({ message: 'Usuario no encontrado.' });
+      return res.status(400).json({ message: 'Usuario no encontrado.' });
     }
     data[userIndex] = {
       ...data[userIndex],
