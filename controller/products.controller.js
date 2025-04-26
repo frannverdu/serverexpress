@@ -63,8 +63,8 @@ export const getProductByParams = (req, res) => {
 export const updateProduct = (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre, desc, precio, imagen } = req.body || {};
-        if (!id || !nombre || !desc || !precio || !imagen) {
+        const { name, desc, price, image } = req.body || {};
+        if (!id || !name || !desc || !price || !image) {
             return res.status(400).json({ message: 'Faltan datos obligatorios para actualizar el producto.' });
         }
         const productIndex = data.findIndex(product => product.id === parseInt(id));
@@ -73,10 +73,10 @@ export const updateProduct = (req, res) => {
         }
         data[productIndex] = {
             ...data[productIndex],
-            nombre,
+            nombre: name,
             desc,
-            precio,
-            imagen,
+            precio: price,
+            imagen: image,
         };
         res.status(200).json(data[productIndex]);
     } catch (error) {
