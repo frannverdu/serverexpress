@@ -1,82 +1,80 @@
-import data from '../data/ventas.json' with { type: "json" };
+import sales from '../data/ventas.json' with { type: "json" };
+import users from '../data/usuarios.json' with { type: "json" };
+import productsData from '../data/productos.json' with { type: "json" };
 
-export const getVentas = (req, res) => {
-    if (!data || data.length === 0) {
+export const getSales = (req, res) => {
+    if (!sales || sales.length === 0) {
         return res.status(400).json({ message: 'No hay ventas disponibles.' });
     }
-    res.json(data);
+    res.json(sales);
 };
 
-export const getVenta = (req, res) => {
+export const getSale = (req, res) => {
     const { id } = req.params;
-    const venta = data.find(venta => venta.id === parseInt(id));
-    if (!venta) {
+    const sale = sales.find(sale => sale.id === parseInt(id));
+    if (!sale) {
         return res.status(400).json({ message: 'Venta no encontrada.' });
     }
-    res.json(venta);
+    res.json(sale);
 };
 
-export const getVentasByUsuario = (req, res) => {
-    const { id_usuario } = req.params;
-    const ventasUsuario = data.filter(venta => venta.id_usuario === parseInt(id_usuario));
-
-    if (ventasUsuario.length === 0) {
-        return res.status(400).json({ message: 'No se encontraron ventas para este usuario.' });
-    }
-
-    res.json(ventasUsuario);
-};
-
-export const createVenta = (req, res) => {
+export const createSale = (req, res) => {
     try {
-        const { id_usuario, fecha, total, dirección, productos } = req.body || {};
-
-        if (!id_usuario || !fecha || !total || !dirección || !productos || productos.length === 0) {
+        const { userId, date, total, address, products } = req.body || {};
+        if (!userId || !date || !total || !address || !products || !products.length) {
             return res.status(400).json({ message: 'Faltan datos obligatorios para crear la venta.' });
         }
-
-        const newId = data.length > 0 ? Math.max(...data.map(venta => venta.id)) + 1 : 1;
-        const newVenta = {
+        // Validar que exista el usuario
+        const userExists = users.some(user => user.id === userId);
+        if (!userExists) {
+            return res.status(400).json({ message: 'El usuario no existe.' });
+        }
+        // Validar que exista el producto
+        const invalidProductIds = products.filter(product => !productsData.some(item => item.id === product.id)).map(product => product.id);
+        if (invalidProductIds.length > 0) {
+            return res.status(400).json({ message: `Los siguientes productos no existen: ${invalidProductIds.join(', ')}` });
+        }
+        const newId = sales.length > 0 ? Math.max(...sales.map(sale => sale.id)) + 1 : 1;
+        const newSale = {
             id: newId,
-            id_usuario,
-            fecha,
+            id_usuario: userId,
+            fecha: date,
             total,
-            dirección,
-            productos
+            direccion: address,
+            productos: products
         };
-        
-        data.push(newVenta);
-        res.status(201).json(newVenta);
+        sales.push(newSale);
+        res.status(201).json(newSale);
     } catch (error) {
         res.status(500).json({ message: 'Hubo un error al crear la venta.' });
     }
 };
 
-export const updateVenta = (req, res) => {
-    try {
-        const { id } = req.params;
-        const { id_usuario, fecha, total, dirección, productos } = req.body || {};
+// export const updateSale = (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { id_usuario, fecha, total, dirección, productos } = req.body || {};
 
-        if (!id || !id_usuario || !fecha || !total || !dirección || !productos || productos.length === 0) {
-            return res.status(400).json({ message: 'Faltan datos obligatorios para actualizar la venta.' });
-        }
+//         if (!id || !id_usuario || !fecha || !total || !dirección || !productos || productos.length === 0) {
+//             return res.status(400).json({ message: 'Faltan datos obligatorios para actualizar la venta.' });
+//         }
 
-        const ventaIndex = data.findIndex(venta => venta.id === parseInt(id));
-        if (ventaIndex === -1) {
-            return res.status(400).json({ message: 'Venta no encontrada.' });
-        }
+//         const ventaIndex = sales.findIndex(venta => venta.id === parseInt(id));
+//         if (ventaIndex === -1) {
+//             return res.status(400).json({ message: 'Venta no encontrada.' });
+//         }
 
-        data[ventaIndex] = {
-            ...data[ventaIndex],
-            id_usuario,
-            fecha,
-            total,
-            dirección,
-            productos,
-        };
+//         sales[ventaIndex] = {
+//             ...sales[ventaIndex],
+//             id_usuario,
+//             fecha,
+//             total,
+//             dirección,
+//             productos,
+//         };
 
-        res.status(200).json(data[ventaIndex]);
-    } catch (error) {
-        res.status(500).json({ message: 'Hubo un problema al actualizar la venta.' });
-    }
-};
+//         res.status(200).json(sales[ventaIndex]);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Hubo un problema al actualizar la venta.' });
+//     }
+// };

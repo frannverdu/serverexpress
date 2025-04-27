@@ -1,19 +1,19 @@
 import { Router } from 'express';
 
 import {
-  getVentas,
-  getVenta,
-  getVentasByUsuario,
-  createVenta,
-  updateVenta,
+  getSales,
+  getSale,
+  // getSalesByParams,
+  createSale,
+  // updateVenta,
 } from '../controller/sales.controller.js';
 
 const router = Router();
 
-router.get('/sales', getVentas);
-router.get('/sales/:id', getVenta);
-router.get('/sales/usuario/:id_usuario', getVentasByUsuario);
-router.post('/sales', createVenta);
-router.put('/sales/:id', updateVenta);
+router.get('/sales', getSales);
+router.get('/sales/:id', getSale);
+router.post('/sale', createSale);
+// router.post('/sales/byparams', getSalesByParams);
+// router.put('/sales/:id', updateVenta);
 
 export default router;
