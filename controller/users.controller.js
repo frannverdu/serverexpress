@@ -1,15 +1,16 @@
-import data from '../data/usuarios.json' with { type: "json" };
+import usersData from '../data/usuarios.json' with { type: "json" };
+import sales from '../data/ventas.json' with { type: "json" };
 
 export const getUsers = (req, res) => {
-  if (!data || data.length === 0) {
+  if (!usersData || usersData.length === 0) {
     return res.status(400).json({ message: 'No hay usuarios disponibles.' });
   }
-  res.json(data);
+  res.json(usersData);
 };
 
 export const getUser = (req, res) => {
   const { id } = req.params;
-  const user = data.find(user => user.id === parseInt(id));
+  const user = usersData.find(user => user.id === parseInt(id));
   if (!user) {
     return res.status(400).json({ message: 'Usuario no encontrado.' });
   }
@@ -22,11 +23,11 @@ export const createUser = (req, res) => {
     if (!name || !lastName || !email || !password) {
       return res.status(400).json({ message: 'Faltan datos obligatorios' });
     }
-    const existingUser = data.find(user => user.email === email);
+    const existingUser = usersData.find(user => user.email === email);
     if (existingUser) {
       return res.status(400).json({ message: 'El correo electrónico ya está registrado' });
     }
-    const newId = data.length > 0 ? Math.max(...data.map(user => user.id)) + 1 : 1;
+    const newId = usersData.length > 0 ? Math.max(...usersData.map(user => user.id)) + 1 : 1;
     const newUser = {
       id: newId,
       nombre: name,
@@ -34,7 +35,7 @@ export const createUser = (req, res) => {
       email,
       contraseña: password
     }; s
-    data.push(newUser);
+    usersData.push(newUser);
     res.status(201).json(newUser);
   } catch (error) {
     res.status(500).json({ message: 'Hubo un error al crear el usuario' });
@@ -44,7 +45,7 @@ export const createUser = (req, res) => {
 export const getUserByParams = (req, res) => {
   try {
     const { names, lastNames, emails } = req.body || {};
-    let filteredUsers = data;
+    let filteredUsers = usersData;
     if (names && Array.isArray(names) && names.length) {
       filteredUsers = filteredUsers.filter(user =>
         names.some(name => user.nombre.toLowerCase().includes(name.toLowerCase()))
@@ -76,19 +77,33 @@ export const updateUser = (req, res) => {
     if (!id || !name || !lastName || !email || !password) {
       return res.status(400).json({ message: 'Faltan datos obligatorios para actualizar el usuario.' });
     }
-    const userIndex = data.findIndex(user => user.id === parseInt(id));
+    const userIndex = usersData.findIndex(user => user.id === parseInt(id));
     if (userIndex === -1) {
       return res.status(400).json({ message: 'Usuario no encontrado.' });
     }
-    data[userIndex] = {
-      ...data[userIndex],
+    usersData[userIndex] = {
+      ...usersData[userIndex],
       nombre: name,
       apellido: lastName,
       email: email,
       contraseña: password,
     };
-    res.status(200).json(data[userIndex]);
+    res.status(200).json(usersData[userIndex]);
   } catch (error) {
     res.status(500).json({ message: 'Hubo un problema al actualizar el usuario.' });
   }
+};
+
+export const deleteUser = (req, res) => {
+  const { id } = req.params;
+  const userHasSales = sales.some(sale => sale.id_usuario === parseInt(id));
+  if (userHasSales) {
+    return res.status(400).json({ message: 'No se puede eliminar el usuario porque está vinculado a una venta.' });
+  }
+  const userIndex = usersData.findIndex(user => user.id === parseInt(id));
+  if (userIndex === -1) {
+    return res.status(400).json({ message: 'Usuario no encontrado.' });
+  }
+  usersData.splice(userIndex, 1);
+  res.status(200).json({ message: 'Usuario eliminado correctamente.' });
 };
