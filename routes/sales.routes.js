@@ -5,15 +5,15 @@ import {
   getSale,
   getSalesByParams,
   createSale,
-  // updateVenta,
+  updateSale,
 } from '../controller/sales.controller.js';
 
 const router = Router();
 
 router.get('/sales', getSales);
-router.get('/sales/:id', getSale);
+router.get('/sale/:id', getSale);
 router.post('/sale', createSale);
 router.post('/sales/byparams', getSalesByParams);
-// router.put('/sales/:id', updateVenta);
+router.put('/sale/:id', updateSale);
 
 export default router;
