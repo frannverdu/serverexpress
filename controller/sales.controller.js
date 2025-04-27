@@ -50,6 +50,35 @@ export const createSale = (req, res) => {
     }
 };
 
+export const getSalesByParams = (req, res) => {
+    try {
+        const { dates, users, totals } = req.body || {};
+        let filteredSales = sales;
+        if (dates && Array.isArray(dates) && dates.length) {
+            filteredSales = filteredSales.filter(sale =>
+                dates.some(fecha => sale.fecha.includes(fecha))
+            );
+        }
+        if (users && Array.isArray(users) && users.length) {
+            filteredSales = filteredSales.filter(sale =>
+                users.includes(sale.id_usuario)
+            );
+        }
+        if (totals && Array.isArray(totals) && totals.length) {
+            filteredSales = filteredSales.filter(sale =>
+                totals.some(total => sale.total.toString().includes(total.toString()))
+            );
+        }
+        if (filteredSales.length === 0) {
+            return res.status(400).json({ message: 'No se encontraron ventas con esos parámetros' });
+        }
+        res.status(200).json(filteredSales);
+    } catch (error) {
+        res.status(500).json({ message: 'Hubo un problema al buscar las ventas.' });
+    }
+};
+
+
 // export const updateSale = (req, res) => {
 //     try {
 //         const { id } = req.params;
